@@ -12,3 +12,7 @@ A standard way to configure repositories in Github Enterprise as part of workloa
 - [Modules][6]
 - [Resources][7]
 
+## Overview
+
+This module standardizes the initialization of resources sets required to onboard as per the Seed pattern requested.
+
