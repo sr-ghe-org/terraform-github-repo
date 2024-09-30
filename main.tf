@@ -1,6 +1,3 @@
-
-
-
 # -------------------------
 # Repository Configuration.
 # -------------------------
@@ -34,11 +31,11 @@ resource "github_repository" "ghe_repo" {
 }
 
 # Add the repository to the team.
-resource "github_team_repository" "repo" {
-  team_id    = var.team_id
-  repository = github_repository.ghe_repo.name
-  permission = "maintain"
-}
+# resource "github_team_repository" "repo" {
+#   team_id    = var.team_id
+#   repository = github_repository.ghe_repo.name
+#   permission = "maintain"
+# }
 
 # Branch Configuration
 resource "github_branch" "ghe_branch" {
@@ -112,16 +109,17 @@ resource "github_branch_protection" "main_branch_protection" {
 # ------------------------------------------------------------------------------------------
 
 # resource "github_actions_variable" "vault_url" {
-#   # repository       = var.repository_name
 #   repository       = github_repository.ghe_repo.name
 #   variable_name    = "VAULT_URL"
 #   value            = var.wif.hve.address
+#   depends_on       = [ github_repository.ghe_repo ]
 # }
 
 # resource "github_actions_variable" "vault_role" {
-#   repository       = var.repository_name
+#   repository       = github_repository.ghe_repo.name
 #   variable_name    = "VAULT_ROLE"
 #   value            = module.repo_policy_and_jwt_role.jwt_role.role_name
+#   depends_on       = [ github_repository.ghe_repo ]
 # }
 
 
@@ -132,7 +130,6 @@ resource "github_branch_protection" "main_branch_protection" {
 # Create the entry in the WIF provider allowing the repository to impersonate the service account.
 resource "google_service_account_iam_member" "ghe_wif_iam" {
   for_each           = var.wif.gcp
-  # service_account_id = each.value.service_account
   service_account_id = "projects/${each.value.sa_project_id}/serviceAccounts/${each.value.service_account}"
   role               = "roles/iam.workloadIdentityUser"
   member             = "principal://iam.googleapis.com/projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}/subject/github::${github_repository.ghe_repo.full_name}::refs/heads/main"
@@ -141,18 +138,18 @@ resource "google_service_account_iam_member" "ghe_wif_iam" {
 # Configure the required Actions environment variables for WIF enablement.
 resource "github_actions_variable" "wif_gcp_pool_name" {
   for_each         = var.wif.gcp
-  # repository       = var.repository_name
   repository       = github_repository.ghe_repo.name
   variable_name    = "GCP_WIF_POOL_FULL_NAME_${upper(each.key)}"
   value            = "projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}"
+  depends_on       = [ github_repository.ghe_repo ]
 }
 
 # Configure the required Actions environment varialbes for WIF enablement using SA impersonation.
 resource "github_actions_variable" "wif_gcp_sa" {
   for_each         = var.wif.gcp
-  # repository       = var.repository_name
   repository       = github_repository.ghe_repo.name
   variable_name    = "GCP_SERVICE_ACCOUNT_${upper(each.key)}"
   value            = each.value.service_account
+  depends_on       = [ github_repository.ghe_repo ]
 }
 

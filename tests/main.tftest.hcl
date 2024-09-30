@@ -19,13 +19,15 @@ variables {
   wif         = {
     gcp = {
       test_one = {
-        service_account = "projects/dummypr/serviceAccounts/prsdfsdf@dummysa.iam.gserviceaccount.com"
+        service_account = "prsdfsdf@dummysa.iam.gserviceaccount.com"
+        sa_project_id   = "prdummy"
         project_number  = "prblah"
         pool_id         = "prtestpool"
         provider_id     = "prtestprovider"
       },
       test_two = {
-        service_account = "projects/dummynp/serviceAccounts/npsdfsdf@dummysa.iam.gserviceaccount.com"
+        service_account = "npsdfsdf@dummysa.iam.gserviceaccount.com"
+        sa_project_id   = "npdummy"
         project_number  = "npblah"
         pool_id         = "nptestpool"
         provider_id     = "nptestprovider"
@@ -34,6 +36,7 @@ variables {
     hve = {
       address           = "blah.bloo.blee"
       auth_path         = "/foo/fee/fum"
+      namespace         = "test"
     }
   }
   workload_id           = "abcd"

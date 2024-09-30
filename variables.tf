@@ -37,11 +37,11 @@ variable "repository_topics" {
   nullable    = false
 }
 
-variable "team_id" {
-  description = "The identifier of the Github Team to which this repository belongs."
-  type        = string
-  nullable    = false
-}
+# variable "team_id" {
+#   description = "The identifier of the Github Team to which this repository belongs."
+#   type        = string
+#   nullable    = false
+# }
 
 variable "wif" {
   description = "The ensures project creation at the service tier with bindings to the appropriate WIF pool per service."
