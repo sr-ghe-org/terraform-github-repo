@@ -5,7 +5,7 @@
 resource "github_repository" "ghe_repo" {
   name                   = var.repository_name
   description            = var.repository_description
-  visibility             = "private"
+  visibility             = "public"
   has_issues             = false
   has_discussions        = false
   has_projects           = false
@@ -82,8 +82,7 @@ resource "github_branch_protection" "main_branch_protection" {
 # -----------------------------------------
 
 # module "repo_policy_and_jwt_role" {
-#   source          = "app.terraform.io/bankofnovascotia/policy/vault"
-#   version         = ">= 0.0.1, < 1.0.0"
+#   source          = "../terraform-vault-policy"
 #   auth_path       = var.wif.hve.auth_path
 #   bound_audiences = ["vault.workload.identity", "https://github.com/${var.organization}"]
 #   bound_claims = {

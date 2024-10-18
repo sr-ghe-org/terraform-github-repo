@@ -16,7 +16,7 @@ variable "repository_description" {
 
 variable "repository_type" {
   description = "The repository classification"
-  type        = object({
+  type = object({
     template_owner     = string
     template_name      = string
     gitignore_template = string
@@ -33,7 +33,7 @@ variable "repository_name" {
 
 variable "repository_topics" {
   description = "The topics to apply to the repository."
-  type        = list
+  type        = list(any)
   nullable    = false
 }
 
@@ -70,4 +70,4 @@ variable "workload_id" {
     condition     = can(regex("^[a-z][a-z][a-z][a-z]$", var.workload_id))
     error_message = "The APM code is expected to be a 4 alphabetic (lower-case) character string."
   }
-} 
+}
