@@ -85,21 +85,21 @@ resource "github_branch_protection" "main_branch_protection" {
 #   source          = "../terraform-vault-policy"
 #   auth_path       = var.wif.hve.auth_path
 #   bound_audiences = ["vault.workload.identity", "https://github.com/${var.organization}"]
-#   bound_claims    = {
+#   bound_claims = {
 #     repository = github_repository.ghe_repo.full_name
 #   }
 #   path = {
-#       svc = [ "ghec" ],
-#       org = [ var.organization ],
-#       epm = [ var.workload_id ],
-#       env = [ "prd", "noenv" ],
-#       obj = [ github_repository.ghe_repo.name ],
-#       ctx = [ "all" ]
-#     }
-#   policy_name     = "c1/ghec/repo-${github_repository.ghe_repo.name}"
-#   role_name       = github_repository.ghe_repo.name
-#   user_claim      = "iss"
-#   depends_on      = [ github_repository.ghe_repo ]
+#     svc = ["ghec"],
+#     org = [var.organization],
+#     epm = [var.workload_id],
+#     env = ["prd", "noenv"],
+#     obj = [github_repository.ghe_repo.name],
+#     ctx = ["all"]
+#   }
+#   policy_name = "c1/ghec/repo-${github_repository.ghe_repo.name}"
+#   role_name   = github_repository.ghe_repo.name
+#   user_claim  = "iss"
+#   depends_on  = [github_repository.ghe_repo]
 # }
 
 
@@ -109,17 +109,17 @@ resource "github_branch_protection" "main_branch_protection" {
 # ------------------------------------------------------------------------------------------
 
 # resource "github_actions_variable" "vault_url" {
-#   repository       = github_repository.ghe_repo.name
-#   variable_name    = "VAULT_URL"
-#   value            = var.wif.hve.address
-#   depends_on       = [ github_repository.ghe_repo ]
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "VAULT_URL"
+#   value         = var.wif.hve.address
+#   depends_on    = [github_repository.ghe_repo]
 # }
 
 # resource "github_actions_variable" "vault_role" {
-#   repository       = github_repository.ghe_repo.name
-#   variable_name    = "VAULT_ROLE"
-#   value            = module.repo_policy_and_jwt_role.jwt_role.role_name
-#   depends_on       = [ github_repository.ghe_repo ]
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "VAULT_ROLE"
+#   value         = module.repo_policy_and_jwt_role.jwt_role.role_name
+#   depends_on    = [github_repository.ghe_repo]
 # }
 
 
@@ -127,29 +127,21 @@ resource "github_branch_protection" "main_branch_protection" {
 # Enable access to Google Cloud services via Workload Identity Federation.
 # ------------------------------------------------------------------------
 
-# Create the entry in the WIF provider allowing the repository to impersonate the service account.
-resource "google_service_account_iam_member" "ghe_wif_iam" {
-  for_each           = var.wif.gcp
-  service_account_id = "projects/${each.value.sa_project_id}/serviceAccounts/${each.value.service_account}"
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}/subject/github::${github_repository.ghe_repo.full_name}::refs/heads/main"
-}
-
 # Configure the required Actions environment variables for WIF enablement.
 resource "github_actions_variable" "wif_gcp_pool_name" {
-  for_each         = var.wif.gcp
-  repository       = github_repository.ghe_repo.name
-  variable_name    = "GCP_WIF_POOL_FULL_NAME_${upper(each.key)}"
-  value            = "projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}"
-  depends_on       = [ github_repository.ghe_repo ]
+  for_each      = var.wif.gcp
+  repository    = github_repository.ghe_repo.name
+  variable_name = "GCP_WIF_POOL_FULL_NAME_${upper(each.key)}"
+  value         = "projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}"
+  depends_on    = [github_repository.ghe_repo]
 }
 
 # Configure the required Actions environment varialbes for WIF enablement using SA impersonation.
 resource "github_actions_variable" "wif_gcp_sa" {
-  for_each         = var.wif.gcp
-  repository       = github_repository.ghe_repo.name
-  variable_name    = "GCP_SERVICE_ACCOUNT_${upper(each.key)}"
-  value            = each.value.service_account
-  depends_on       = [ github_repository.ghe_repo ]
+  for_each      = var.wif.gcp
+  repository    = github_repository.ghe_repo.name
+  variable_name = "GCP_SERVICE_ACCOUNT_${upper(each.key)}"
+  value         = each.value.service_account
+  depends_on    = [github_repository.ghe_repo]
 }
 

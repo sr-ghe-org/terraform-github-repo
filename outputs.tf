@@ -35,6 +35,6 @@ output "branch" {
 # The branch protection configuration
 output "branch_protection" {
   description = "The branch protection configuration for the repository."
-  value       = github_branch_protection.main_branch_protection 
+  value       = github_branch_protection.main_branch_protection
 }
 
