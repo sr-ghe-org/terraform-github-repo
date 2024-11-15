@@ -1,0 +1,9 @@
+name: 	   publish_terraform_module
+run-name:  "Publication: Terraform Module"
+on:
+  push:
+    tags:
+      - 'v[0-9].[0-9].[0-9]'
+jobs:
+  publish:
+    uses: bns-infra/workflows-platform-foundations/.github/workflows/publish_terraform_module.yaml@main

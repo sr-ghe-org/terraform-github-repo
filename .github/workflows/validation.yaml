@@ -1,0 +1,12 @@
+name: 	   validate_terraform_module
+run-name:  "Validation: Terraform Modules"
+on:
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  validate:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: bns-infra/reusable-workflows-platform-foundations/.github/workflows/validate_terraform_module.yaml@main
