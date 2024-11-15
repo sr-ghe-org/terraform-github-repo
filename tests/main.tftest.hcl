@@ -1,8 +1,6 @@
 
 mock_provider "github" {}
 mock_provider "vault" {}
-mock_provider "google" {}
-mock_provider "google-beta" {}
 
 # dummy values which are provided by the context
 variables {
@@ -31,6 +29,13 @@ variables {
         project_number  = "npblah"
         pool_id         = "nptestpool"
         provider_id     = "nptestprovider"
+      },
+      test_three = {
+        service_account = "sdsdfsdf@dummysa.iam.gserviceaccount.com"
+        sa_project_id   = "sddummy"
+        project_number  = "sdblah"
+        pool_id         = "sdtestpool"
+        provider_id     = "sdtestprovider"
       }
     },
     hve = {
@@ -130,11 +135,83 @@ run "ensure_pull_request_needs_robot_validation" {
   }
 }
 
-# ensure that all pull requests must pass automated validation.
+# ensure that if the WIF pool argument have full integrity that all environment variables get made.
 run "ensure_environment_variables_are_made" {
   assert {
-    condition     = length(keys(github_actions_variable.wif_gcp_pool_name)) == 2
-    error_message = "The expectation is that 2 environment variables for the pool name got created."
+    condition     = length(keys(github_actions_variable.wif_gcp_sa)) == 3
+    error_message = "The expectation is that 3 environment variables for the WIF SA got created."
+  }  
+  assert {
+    condition     = length(keys(github_actions_variable.wif_gcp_pool_name)) == 3
+    error_message = "The expectation is that 3 environment variables for the pool name got created."
   }
 }
 
+# ensure that if the WIF pool arguments have no integrity that none of the environment variables get made.
+run "ensure_environment_variables_are_not_made_wnen_map_is_bad" {
+
+  variables {
+    wif         = {
+      gcp = {
+        test_one = {
+          service_account = ""
+          sa_project_id   = "npdummy"
+          project_number  = ""
+          pool_id         = ""
+          provider_id     = "prtestprovider"
+        },
+        test_two = {
+          service_account = ""
+          sa_project_id   = "npdummy"
+          project_number  = ""
+          pool_id         = ""
+          provider_id     = "nptestprovider"
+        },
+        test_three = {
+          service_account = ""
+          sa_project_id   = ""
+          project_number  = "npblah"
+          pool_id         = ""
+          provider_id     = "nptestprovider"
+        }
+      },
+      hve = {
+        address           = "blah.bloo.blee"
+        auth_path         = "/foo/fee/fum"
+        namespace         = "test"
+      }
+    }
+  }
+
+  assert {
+    condition     = length(keys(github_actions_variable.wif_gcp_sa)) == 0
+    error_message = "The expectation is that 2 environment variables for the WIF SA got created."
+  }
+  assert {
+    condition     = length(keys(github_actions_variable.wif_gcp_pool_name)) == 0
+    error_message = "The expectation is that 1 environment variables for the pool name got created."
+  }
+}
+
+# if no gcp WIF is passed, we should not create any WIF related GHA variables.
+run "ensure_environment_variables_are_not_made_wnen_map_is_empty" {
+    
+  variables {
+    wif         = {
+      gcp = {},
+      hve = {
+        address           = "blah.bloo.blee"
+        auth_path         = "/foo/fee/fum"
+        namespace         = "test"
+      }
+    }
+  }
+  assert {
+    condition     = length(keys(github_actions_variable.wif_gcp_sa)) == 0
+    error_message = "The expectation is that 2 environment variables for the WIF SA got created."
+  }
+  assert {
+    condition     = length(keys(github_actions_variable.wif_gcp_pool_name)) == 0
+    error_message = "The expectation is that 0 environment variables for the pool name got created."
+  }
+}

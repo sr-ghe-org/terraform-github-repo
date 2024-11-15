@@ -5,7 +5,7 @@ variable "organization" {
   description = "The Github Enterprise organization"
   type        = string
   nullable    = false
-  default     = "sr-ghe-org"
+  default     = "bns-infra"
 }
 
 variable "repository_description" {
@@ -37,27 +37,27 @@ variable "repository_topics" {
   nullable    = false
 }
 
-# variable "team_id" {
-#   description = "The identifier of the Github Team to which this repository belongs."
-#   type        = string
-#   nullable    = false
-# }
+variable "team_id" {
+  description = "The identifier of the Github Team to which this repository belongs."
+  type        = string
+  nullable    = false
+}
 
 variable "wif" {
   description = "The ensures project creation at the service tier with bindings to the appropriate WIF pool per service."
   type = object({
-    gcp = map(object({
+    gcp = optional(map(object({
       service_account = string
       sa_project_id   = string
       project_number  = string
       pool_id         = string
       provider_id     = string
-    })),
-    # hve = object({
-    #   address           = string
-    #   auth_path         = string
-    #   namespace         = string
-    # })
+    }))),
+    hve = object({
+      address   = string
+      auth_path = string
+      namespace = string
+    })
   })
   nullable = false
 }

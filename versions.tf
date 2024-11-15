@@ -21,14 +21,6 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.0"
     }
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5.33, < 6"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 5.33, < 6"
-    }
     vault = {
       source  = "hashicorp/vault"
       version = "~> 4.4"
