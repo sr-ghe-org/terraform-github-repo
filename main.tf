@@ -62,7 +62,7 @@
 resource "github_repository" "ghe_repo" {
   name                   = var.repository_name
   description            = var.repository_description
-  visibility             = "private"
+  visibility             = "public"
   has_issues             = false
   has_discussions        = false
   has_projects           = false
@@ -88,11 +88,11 @@ resource "github_repository" "ghe_repo" {
 }
 
 # Add the repository to the team.
-resource "github_team_repository" "repo" {
-  team_id    = var.team_id
-  repository = github_repository.ghe_repo.name
-  permission = "maintain"
-}
+# resource "github_team_repository" "repo" {
+#   team_id    = var.team_id
+#   repository = github_repository.ghe_repo.name
+#   permission = "maintain"
+# }
 
 # Branch Configuration
 resource "github_branch" "ghe_branch" {
@@ -138,27 +138,27 @@ resource "github_branch_protection" "main_branch_protection" {
 # Create a JWT role and policy per backend.
 # -----------------------------------------
 
-module "repo_policy_and_jwt_role" {
-  source          = "app.terraform.io/bankofnovascotia/policy/vault"
-  version         = ">= 0.0.1, < 1.0.0"
-  auth_path       = var.wif.hve.auth_path
-  bound_audiences = ["vault.workload.identity", "https://github.com/${var.organization}"]
-  bound_claims = {
-    repository = github_repository.ghe_repo.full_name
-  }
-  path = {
-    svc = ["ghec"],
-    org = [var.organization],
-    epm = [var.workload_id],
-    env = ["prd", "noenv"],
-    obj = [github_repository.ghe_repo.name],
-    ctx = ["all"]
-  }
-  policy_name = "c1/ghec/repo-${github_repository.ghe_repo.name}"
-  role_name   = github_repository.ghe_repo.name
-  user_claim  = "iss"
-  depends_on  = [github_repository.ghe_repo]
-}
+# module "repo_policy_and_jwt_role" {
+#   source          = "app.terraform.io/bankofnovascotia/policy/vault"
+#   version         = ">= 0.0.1, < 1.0.0"
+#   auth_path       = var.wif.hve.auth_path
+#   bound_audiences = ["vault.workload.identity", "https://github.com/${var.organization}"]
+#   bound_claims = {
+#     repository = github_repository.ghe_repo.full_name
+#   }
+#   path = {
+#     svc = ["ghec"],
+#     org = [var.organization],
+#     epm = [var.workload_id],
+#     env = ["prd", "noenv"],
+#     obj = [github_repository.ghe_repo.name],
+#     ctx = ["all"]
+#   }
+#   policy_name = "c1/ghec/repo-${github_repository.ghe_repo.name}"
+#   role_name   = github_repository.ghe_repo.name
+#   user_claim  = "iss"
+#   depends_on  = [github_repository.ghe_repo]
+# }
 
 
 # ------------------------------------------------------------------------------------------
@@ -166,19 +166,19 @@ module "repo_policy_and_jwt_role" {
 #   https://github.com/hashicorp/vault-action?tab=readme-ov-file#jwt-with-github-oidc-tokens
 # ------------------------------------------------------------------------------------------
 
-resource "github_actions_variable" "vault_url" {
-  repository    = github_repository.ghe_repo.name
-  variable_name = "VAULT_URL"
-  value         = var.wif.hve.address
-  depends_on    = [github_repository.ghe_repo]
-}
+# resource "github_actions_variable" "vault_url" {
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "VAULT_URL"
+#   value         = var.wif.hve.address
+#   depends_on    = [github_repository.ghe_repo]
+# }
 
-resource "github_actions_variable" "vault_role" {
-  repository    = github_repository.ghe_repo.name
-  variable_name = "VAULT_ROLE"
-  value         = module.repo_policy_and_jwt_role.jwt_role.role_name
-  depends_on    = [github_repository.ghe_repo]
-}
+# resource "github_actions_variable" "vault_role" {
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "VAULT_ROLE"
+#   value         = module.repo_policy_and_jwt_role.jwt_role.role_name
+#   depends_on    = [github_repository.ghe_repo]
+# }
 
 
 # --------------------------------------------------------------------------------
@@ -191,20 +191,20 @@ locals {
 }
 
 # Configure the required Actions environment variables for WIF enablement.
-resource "github_actions_variable" "wif_gcp_pool_name" {
-  for_each      = { for k, v in local.wif : k => v if !(v.project_number == "" || v.pool_id == "") }
-  repository    = github_repository.ghe_repo.name
-  variable_name = "GCP_WIF_POOL_FULL_NAME_${upper(each.key)}"
-  value         = "projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}"
-  depends_on    = [github_repository.ghe_repo]
-}
+# resource "github_actions_variable" "wif_gcp_pool_name" {
+#   for_each      = { for k, v in local.wif : k => v if !(v.project_number == "" || v.pool_id == "") }
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "GCP_WIF_POOL_FULL_NAME_${upper(each.key)}"
+#   value         = "projects/${each.value.project_number}/locations/global/workloadIdentityPools/${each.value.pool_id}"
+#   depends_on    = [github_repository.ghe_repo]
+# }
 
 # Configure the required Actions environment varialbes for WIF enablement using SA impersonation.
-resource "github_actions_variable" "wif_gcp_sa" {
-  for_each      = { for k, v in local.wif : k => v if !(v.service_account == "") }
-  repository    = github_repository.ghe_repo.name
-  variable_name = "GCP_SERVICE_ACCOUNT_${upper(each.key)}"
-  value         = each.value.service_account
-  depends_on    = [github_repository.ghe_repo]
-}
+# resource "github_actions_variable" "wif_gcp_sa" {
+#   for_each      = { for k, v in local.wif : k => v if !(v.service_account == "") }
+#   repository    = github_repository.ghe_repo.name
+#   variable_name = "GCP_SERVICE_ACCOUNT_${upper(each.key)}"
+#   value         = each.value.service_account
+#   depends_on    = [github_repository.ghe_repo]
+# }
 

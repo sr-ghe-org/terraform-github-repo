@@ -21,10 +21,10 @@ output "repository" {
 }
 
 # The team details
-output "team" {
-  description = "The team and entitlements for the reposoitory"
-  value       = github_team_repository.repo
-}
+# output "team" {
+#   description = "The team and entitlements for the reposoitory"
+#   value       = github_team_repository.repo
+# }
 
 # The branch configuration
 output "branch" {
